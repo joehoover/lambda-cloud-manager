@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "lambda-cloud-manager"
+version = "0.1.0"
+description = ""
+authors = ["Joe Hoover <joehoover88@gmail.com>"]
+readme = "README.md"
+packages = [{include = "lambda_cloud_manager"}]
+
+[tool.poetry.scripts]
+lcm = "rick_portal_gun.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = {extras = ["all"], version = "^0.7.0"}
+python-dotenv = "^0.21.1"
+requests = "^2.28.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
