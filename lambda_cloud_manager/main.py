@@ -80,11 +80,15 @@ def ssh_keys():
 
 
 @app.command()
-def launch(config_path: str, name: Optional[str] = None):
+def launch(config_path: str, name: str):
     """
-    Lists SSH keys.
-    :return:
+    Launches an instance, based on specified config.
+
+    :param config_path: Path to config specifying instance requirements.
+    :param name: Name for instance
+    :return: None
     """
+
 
     with open(config_path, 'r') as f:
         config = f.read().replace('\n', '').replace('\r', '').encode()
@@ -99,8 +103,8 @@ def launch(config_path: str, name: Optional[str] = None):
 @app.command()
 def terminate(config_path: str = None, name: Optional[str] = None, all: bool = False):
     """
-    Lists SSH keys.
-    :return:
+    Terminates single instances by name or all instances if `--all`.
+    :return: None
     """
 
     if name and config_path:

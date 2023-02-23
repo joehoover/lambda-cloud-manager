@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "lambda_cloud_manager"}]
 
 [tool.poetry.scripts]
-lcm = "rick_portal_gun.main:app"
+lcm = "lambda_cloud_manager.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.11"
