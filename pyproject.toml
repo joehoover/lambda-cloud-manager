@@ -10,7 +10,7 @@ packages = [{include = "lambda_cloud_manager"}]
 lcm = "lambda_cloud_manager.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 typer = {extras = ["all"], version = "^0.7.0"}
 python-dotenv = "^0.21.1"
 requests = "^2.28.2"
