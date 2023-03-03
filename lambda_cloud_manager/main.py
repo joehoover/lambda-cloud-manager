@@ -7,14 +7,12 @@ from dotenv import load_dotenv
 
 from typing import Optional
 
-URL = "https://cloud.lambdalabs.com/api/v1/"
-
 load_dotenv()
-
 app = typer.Typer()
 
 
-def _base_get(url: str = URL, endpoint=None):
+def _base_get(url: str = "https://cloud.lambdalabs.com/api/v1/", endpoint=None):
+
     response = requests.get(
         os.path.join(url, endpoint),
         auth=(os.getenv('LAMBDA_API_KEY', ''), '')
@@ -22,7 +20,8 @@ def _base_get(url: str = URL, endpoint=None):
     return response
 
 
-def _base_post(url: str = URL, endpoint: str = None, data: str = None, json: dict = None):
+def _base_post(url: str = "https://cloud.lambdalabs.com/api/v1/", endpoint: str = None, data: str = None, json: dict = None):
+
     headers = {
         'Content-Type': 'application/json',
     }
@@ -45,50 +44,39 @@ def _base_post(url: str = URL, endpoint: str = None, data: str = None, json: dic
 
 
 @app.command()
-def instance_types():
-    """
-    Returns information on available instance types.
-    :return: None
-    """
+def get_instance_types(
+        verbose: bool =True,
+        available: bool=True
+):
+
     response = _base_get(endpoint='instance-types')
     data = json.loads(response.text).get("data")
-    print(json.dumps(data, indent=4))
+    instance_types = json.dumps(data, indent=4)
+    if verbose:
+        print(instance_types)
+    return
 
 
 @app.command()
-def instances(verbose=True):
-    """
-    Returns information on running instances
-    :return:
-    """
+def get_instances(verbose=True):
+
     response = _base_get(endpoint='instances')
-    data = json.loads(response.text).get("data")
+    data = json.loads(response.text).get('data')
     if verbose:
         print(json.dumps(data, indent=4))
-    return (data)
+    return data
 
 
 @app.command()
 def ssh_keys():
-    """
-    Lists SSH keys.
-    :return:
-    """
+
     response = _base_get(endpoint='ssh-keys')
     data = json.loads(response.text).get("data")
     print(json.dumps(data, indent=4))
 
 
 @app.command()
-def launch(config_path: str, name: str):
-    """
-    Launches an instance, based on specified config.
-
-    :param config_path: Path to config specifying instance requirements.
-    :param name: Name for instance
-    :return: None
-    """
-
+def launch(config_path: str, name: str = None):
 
     with open(config_path, 'r') as f:
         config = f.read().replace('\n', '').replace('\r', '').encode()
@@ -102,16 +90,12 @@ def launch(config_path: str, name: str):
 
 @app.command()
 def terminate(config_path: str = None, name: Optional[str] = None, all: bool = False):
-    """
-    Terminates single instances by name or all instances if `--all`.
-    :return: None
-    """
 
     if name and config_path:
         raise Exception("Specify either `config_path` or name, not both.")
 
     if (name or config_path) and all:
-        raise Exception("To terminate all instances, you must not set name or config_path.")
+        raise Exception("To terminate all get_instances, you must not set name or config_path.")
 
 
     if config_path:
@@ -125,7 +109,7 @@ def terminate(config_path: str = None, name: Optional[str] = None, all: bool = F
 
         name = config.get("name")
 
-    instance_data = instances(verbose=False)
+    instance_data = get_instances(verbose=False)
 
     if not all:
         ids = [i.get("id") for i in instance_data if i.get("name") == name]
@@ -138,7 +122,6 @@ def terminate(config_path: str = None, name: Optional[str] = None, all: bool = F
         "instance_ids": ids
     }
 
-
     response = _base_post(endpoint='instance-operations/terminate', json=config)
     print(response)
     #
@@ -149,4 +132,3 @@ def terminate(config_path: str = None, name: Optional[str] = None, all: bool = F
 if __name__ == "__main__":
     app()
 
-    # curl -u secret_joe-mbp_498ab6f0ecf64ab0a4a7edfaa8d03906.eOQACoj1eUBfKDDxp6cuwYPeCibk9YTY: https://cloud.lambdalabs.com/api/v1/instance-operations/launch -d @request.json -H "Content-Type: application/json" | jq .
