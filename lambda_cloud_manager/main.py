@@ -2,133 +2,105 @@ import typer
 import requests
 import os
 import json
+import logging
 
 from dotenv import load_dotenv
 
 from typing import Optional
 
+from .api_adapters import InstanceManager
+from .config_generator import generate_config
+
+logging.basicConfig(encoding='utf-8', level=logging.INFO)
+
 load_dotenv()
 app = typer.Typer()
 
 
-def _base_get(url: str = "https://cloud.lambdalabs.com/api/v1/", endpoint=None):
-
-    response = requests.get(
-        os.path.join(url, endpoint),
-        auth=(os.getenv('LAMBDA_API_KEY', ''), '')
-    )
-    return response
-
-
-def _base_post(url: str = "https://cloud.lambdalabs.com/api/v1/", endpoint: str = None, data: str = None, json: dict = None):
-
-    headers = {
-        'Content-Type': 'application/json',
-    }
-
-    try:
-        response = requests.post(
-            os.path.join(url, endpoint),
-            auth=(os.getenv('LAMBDA_API_KEY', ''), ''),
-            data=data,
-            json=json,
-        )
-
-        response.raise_for_status()
-
-    except requests.exceptions.HTTPError as errh:
-        print("HTTP Error")
-        print(errh.args[0])
-
-    return response
-
-
 @app.command()
 def get_instance_types(
-        verbose: bool =True,
-        available: bool=True
-):
+        verbose: bool = True,
+        available: bool = False,
+) -> dict:
+    """
 
-    response = _base_get(endpoint='instance-types')
-    data = json.loads(response.text).get("data")
-    instance_types = json.dumps(data, indent=4)
-    if verbose:
-        print(instance_types)
-    return
+    Parameters
+    ----------
+    verbose: bool
+        If True, returned instance types are printed
+    available: bool
+        If True, only information for available instance types is returned
+
+    Returns
+    -------
+    dict
+        A dictionary of dictionaries containing information about each instance type
+
+
+    """
+
+    instance_types = InstanceManager().get_instance_types()
+    logging.info(json.dumps(instance_types, indent=4))
+
+    return instance_types
+
 
 
 @app.command()
 def get_instances(verbose=True):
-
-    response = _base_get(endpoint='instances')
-    data = json.loads(response.text).get('data')
-    if verbose:
-        print(json.dumps(data, indent=4))
-    return data
-
+    instances = InstanceManager().get_instances()
+    logging.info(json.dumps(instances, indent=4))
+    return instances
 
 @app.command()
 def ssh_keys():
-
-    response = _base_get(endpoint='ssh-keys')
-    data = json.loads(response.text).get("data")
-    print(json.dumps(data, indent=4))
-
+    ssh_keys = InstanceManager().ssh_keys()
+    logging.info(json.dumps(ssh_keys, indent=4))
 
 @app.command()
-def launch(config_path: str, name: str = None):
+def launch(
+        config: str,
+        name: str = None,
+        verbose: bool = True,
+):
 
-    with open(config_path, 'r') as f:
-        config = f.read().replace('\n', '').replace('\r', '').encode()
+    instance_data = InstanceManager().launch(config=config, name=name)
+    logging.info(json.dumps(instance_data, indent=4))
 
-    response = _base_post(endpoint='instance-operations/launch', data=config)
-    print(response)
-
-    data = json.loads(response.text).get("data")
-    print(json.dumps(data, indent=4))
-
+    return instance_data
 
 @app.command()
-def terminate(config_path: str = None, name: Optional[str] = None, all: bool = False):
+def terminate(
+        config: str = None,
+        name: Optional[str] = None,
+        all: bool = False,
+        verbose: bool = True
+) -> dict:
 
-    if name and config_path:
-        raise Exception("Specify either `config_path` or name, not both.")
+    termination_data = InstanceManager().terminate(
+        config=config,
+        name=name,
+        all=all
+    )
 
-    if (name or config_path) and all:
-        raise Exception("To terminate all get_instances, you must not set name or config_path.")
+    logging.info(json.dumps(termination_data, indent=4))
 
+    return termination_data
 
-    if config_path:
-        with open(config_path, 'r') as f:
-            config = json.loads(f.read())
-        if 'name' not in config:
-            raise Exception("""
-            You can only use a config to terminate an 
-            instance if the config specifies an instance name.
-            """)
+@app.command()
+def write_config(
+        path: str,
+        instance_type: str = "gpu_1x_a10",
+        region: str = "us-west-1",
 
-        name = config.get("name")
+) -> None:
 
-    instance_data = get_instances(verbose=False)
+    config = generate_config(instance_type, region)
+    config = json.dumps(config, indent=4)
+    with open(path, 'w') as f:
+        f.write(json.dumps(config))
 
-    if not all:
-        ids = [i.get("id") for i in instance_data if i.get("name") == name]
-
-    elif all:
-        ids = [i.get("id") for i in instance_data]
-
-
-    config = {
-        "instance_ids": ids
-    }
-
-    response = _base_post(endpoint='instance-operations/terminate', json=config)
-    print(response)
-    #
-    data = json.loads(response.text).get("data")
-    print(json.dumps(data, indent=4))
-
-
+    logging.info(f"Wrote the following config to `{path}`...")
+    logging.info(config)
 if __name__ == "__main__":
     app()
-
