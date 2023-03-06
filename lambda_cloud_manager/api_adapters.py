@@ -170,6 +170,7 @@ class InstanceManager:
         instance_data = self.get_instances(verbose=False)
 
         if all:
+            logging.info(f'Attempting to terminate all instances...')
             ids = [i.get("id") for i in instance_data]
 
         else:
@@ -180,7 +181,6 @@ class InstanceManager:
             "instance_ids": ids
         }
 
-        logging.info(f'Attempting to terminate instances associated with the name {name}...')
         response = self._base_post(endpoint='instance-operations/terminate', json=config)
         termination_data = json.loads(response.text).get("data")
 
