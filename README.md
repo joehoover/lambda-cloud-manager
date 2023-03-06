@@ -4,7 +4,7 @@ Lambda-cloud-manager is a lightweight command line tool and Python SDK that help
 
 ## Installation
 
-Currently, poetry is easiest way to install the package. Just run:
+Currently, poetry is the easiest way to install the package. Just run:
 
 ```bash
 poetry add git+https://github.com/joehoover/lambda-cloud-manager.git
@@ -38,24 +38,26 @@ lcm get-instance-types
 This logs Lambda Cloud instance types to the console. And, when we find the `gpu_1x_a10` instance, we see:
 
 ```json
-"gpu_1x_a10": {
-        "instance_type": {
-            "name": "gpu_1x_a10",
-            "price_cents_per_hour": 60,
-            "description": "1x A10 (24 GB PCIe)",
-            "specs": {
-                "vcpus": 30,
-                "memory_gib": 200,
-                "storage_gib": 1400
-            }
-        },
-        "regions_with_capacity_available": [
-            {
-                "name": "us-west-1",
-                "description": "California, USA"
-            }
-        ]
-    },
+{
+   "gpu_1x_a10": {
+      "instance_type": {
+         "name": "gpu_1x_a10",
+         "price_cents_per_hour": 60,
+         "description": "1x A10 (24 GB PCIe)",
+         "specs": {
+            "vcpus": 30,
+            "memory_gib": 200,
+            "storage_gib": 1400
+         }
+      },
+      "regions_with_capacity_available": [
+         {
+            "name": "us-west-1",
+            "description": "California, USA"
+         }
+      ]
+   }
+}
 ```
 
 #### Config Specification 

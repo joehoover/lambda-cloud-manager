@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lambda-cloud-manager"
+name = "lambda_cloud_manager"
 version = "0.1.0"
 description = ""
 authors = ["Joe Hoover <joehoover88@gmail.com>"]
