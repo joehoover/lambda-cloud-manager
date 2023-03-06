@@ -7,7 +7,7 @@ Lambda-cloud-manager is a lightweight command line tool and Python SDK that help
 Currently, poetry is easiest way to install the package. Just run:
 
 ```bash
-poetry add git+https://github.com/joehoover/triton-materials.git
+poetry add git+https://github.com/joehoover/lambda-cloud-manager.git
 ```
 
 ## CLI Usage
