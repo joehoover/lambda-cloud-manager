@@ -19,7 +19,6 @@ app = typer.Typer()
 
 @app.command()
 def get_instance_types(
-        verbose: bool = True,
         available: bool = False,
 ) -> dict:
     """
@@ -39,7 +38,7 @@ def get_instance_types(
 
     """
 
-    instance_types = InstanceManager().get_instance_types()
+    instance_types = InstanceManager().get_instance_types(available=available)
     logging.info(json.dumps(instance_types, indent=4))
 
     return instance_types
@@ -96,7 +95,7 @@ def write_config(
 ) -> None:
 
     config = generate_config(instance_type, region)
-    config = json.dumps(config, indent=4)
+    config = json.dumps(config)
     with open(path, 'w') as f:
         f.write(json.dumps(config))
 

@@ -54,7 +54,7 @@ class InstanceManager:
 
     def _base_post(
             self,
-            url: str = "https://cloud.lambdalabs.com/api/v1/",
+            url: str = None,
             endpoint: str = None,
             data: str = None,
             json: dict = None):
@@ -116,7 +116,8 @@ class InstanceManager:
     def ssh_keys(self):
         response = self._base_get(endpoint='ssh-keys')
         data = json.loads(response.text).get("data")
-        logging.info(json.dumps(data, indent=4))
+        return data
+        # logging.info(json.dumps(data, indent=4))
 
     def launch(
             self,
